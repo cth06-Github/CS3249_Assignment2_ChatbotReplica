@@ -1,6 +1,6 @@
 # Pre-Consultation Chatbot - Streamlit Replica
 
-This is a Streamlit replica of the Pre-Consultation Chatbot interface.
+This is a Streamlit replica of the Pre-Consultation Chatbot interface for CS3249 Assignment 2. I did NOT design the chatbot. The teaching team did and I used AI to replicate the design so that my user participants can try it to get a feel without using the actual chatbot.
 
 ## Features
 
