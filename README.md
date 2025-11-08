@@ -10,6 +10,18 @@ This is a Streamlit replica of the Pre-Consultation Chatbot interface for CS3249
 pip install -r requirements.txt
 ```
 
+2. Create a `.env` file by copying the example:
+```bash
+cp .env.example .env
+```
+
+3. Edit the `.env` file and set your valid student ID:
+```
+VALID_STUDENT_ID=A1234567Q
+```
+
+**⚠️ IMPORTANT:** Never commit the `.env` file to Git! It's already in `.gitignore`.
+
 ## Running the Application
 
 Run the Streamlit app with:
@@ -18,3 +30,12 @@ streamlit run app.py
 ```
 
 The application will open in your default web browser at `http://localhost:8501`
+
+## Security (Written by AI)
+
+This application uses environment variables to protect sensitive information:
+- **`.env`** - Contains your actual secrets (NOT committed to Git)
+- **`.env.example`** - Template showing what variables are needed (safe to commit)
+- **`.gitignore`** - Ensures `.env` is never committed to the repository
+
+This allows you to safely publish the code to public repositories without exposing credentials.

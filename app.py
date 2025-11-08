@@ -1,5 +1,10 @@
 import streamlit as st
 import random
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Page configuration
 st.set_page_config(
@@ -176,9 +181,14 @@ def show_login_page():
             if not isValidStudentID(student_id):
                 st.error("Invalid student ID format. Please use format like: A0123456X")
                 return
-            if student_id != "A1234567Q": # Student ID
+            
+            # Get valid student ID from environment variable
+            valid_student_id = os.getenv("VALID_STUDENT_ID", "A1234567Q")
+            
+            if student_id.upper() != valid_student_id.upper():
                 st.error("Invalid student ID")
                 return
+            
             st.session_state.logged_in = True
             st.session_state.student_id = student_id.upper()
             st.rerun()
