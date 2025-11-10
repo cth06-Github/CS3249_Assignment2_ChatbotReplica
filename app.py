@@ -66,9 +66,9 @@ def isValidStudentID(student_id):
 def show_login_page(key=None):
     # Header section
     st.header("Pre-Consultation Chatbot")
-    #st.badge("Version: Version B", color="green")
+    #st.badge("Version: Version X", color="green")
 
-    st.markdown('<div class="version-badge">Version: Version B</div>', unsafe_allow_html=True)
+    st.markdown('<div class="version-badge">Version: Version X</div>', unsafe_allow_html=True)
 
     # Add horizontal line
     st.markdown("---")
