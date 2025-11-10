@@ -30,13 +30,6 @@ if 'messages' not in st.session_state:
 # Custom CSS for styling
 st.markdown("""
     <style>
-    /* Main title styling */
-    h1 {
-        color: #1f1f1f;
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
     
     /* Version badge styling */
     .version-badge {
@@ -49,81 +42,11 @@ st.markdown("""
         font-weight: 500;
         margin-bottom: 2rem;
     }
-        
-    /* Input label styling */
-    .stTextInput label {
-        font-weight: 500;
-        color: #424242;
-    }
-    
-    /* Button styling */
-    .stButton > button {
-        width: 100%;
-        background-color: white;
-        color: #424242;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 0.75rem;
-        font-weight: 500;
-        transition: all 0.3s;
-    }
-    
-    .stButton > button:hover {
-        background-color: #f5f5f5;
-        border-color: #bdbdbd;
-    }
-    
-    /* Character counter styling */
-    .char-counter {
-        text-align: right;
-        font-size: 0.85rem;
-        color: #757575;
-        margin-top: -0.5rem;
+            
+    /* Number styling in sidebar */
+    .number {
+        font-size: 2.5rem;
         margin-bottom: 1rem;
-    }
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {
-        background-color: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        font-weight: 500;
-    }
-    
-    /* Remove top padding */
-    .block-container {
-        padding-top: 2rem;
-    }
-    
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background-color: #f5f5f5;
-    }
-    
-    /* Chat input styling */
-    .stChatInput {
-        border-radius: 8px;
-    }
-    
-    /* Header bar styling */
-    .header-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-    }
-    
-    .student-info {
-        font-size: 1rem;
-        color: #424242;
-    }
-    
-    /* Logout button styling */
-    .logout-btn button {
-        background-color: white !important;
-        border: 1px solid #e0e0e0 !important;
-        padding: 0.5rem 2rem !important;
-        width: auto !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -140,23 +63,23 @@ def isValidStudentID(student_id):
     return True
 
 # Function to show login page
-def show_login_page():
+def show_login_page(key=None):
     # Header section
-    st.markdown("<h1>Pre-Consultation Chatbot</h1>", unsafe_allow_html=True)
+    st.header("Pre-Consultation Chatbot")
+    #st.badge("Version: Version B", color="green")
+
     st.markdown('<div class="version-badge">Version: Version B</div>', unsafe_allow_html=True)
 
     # Add horizontal line
     st.markdown("---")
 
     # Main content
-    st.markdown("## Student Login")
+    st.header("Student Login")
 
     # Info message
     st.info("Please log in with your student ID to access the mental health pre-consultation chatbot.")
 
-    login_container = st.container(border=True)
-    
-    with login_container:
+    with st.form("login_form", border=True):
         # Student ID input
         student_id = st.text_input(
             "Student ID",
@@ -171,27 +94,25 @@ def show_login_page():
         else:
             char_count = 0
 
-        st.markdown(f'<div class="char-counter">{char_count}/9</div>', unsafe_allow_html=True)
-
-        # Login button
-        if st.button("Login", type="secondary", use_container_width=True):
-            if not student_id:
-                st.warning("Please enter your student ID")
-                return
-            if not isValidStudentID(student_id):
-                st.error("Invalid student ID format. Please use format like: A0123456X")
-                return
-            
+        # Login button (submit button must be inside the form)
+        submitted = st.form_submit_button("Login", type="secondary", width="stretch")
+        
+    # Handle form submission (validation happens outside the form context)
+    if submitted:
+        if not student_id:
+            st.warning("Please enter your student ID")
+        elif not isValidStudentID(student_id):
+            st.error("Invalid student ID format. Please use format like: A0123456X")
+        else:
             # Get valid student ID from environment variable
             valid_student_id = os.getenv("VALID_STUDENT_ID", "A1234567Q")
             
             if student_id.upper() != valid_student_id.upper():
                 st.error("Invalid student ID")
-                return
-            
-            st.session_state.logged_in = True
-            st.session_state.student_id = student_id.upper()
-            st.rerun()
+            else:
+                st.session_state.logged_in = True
+                st.session_state.student_id = student_id.upper()
+                st.rerun()
 
     # Instructions expander
     with st.expander("ℹ️ Instructions"):
@@ -214,33 +135,31 @@ def show_login_page():
 def show_chatbot_page():
     # Sidebar
     with st.sidebar:
-        st.markdown("### 📊 Usage Statistics")
-        st.markdown("**Turns Used**")
-        st.markdown(f"## {st.session_state.turns_used}/50")
-        st.markdown("**Remaining**")
-        st.markdown(f"## {50 - st.session_state.turns_used}")
+        st.markdown("## 📊 Usage Statistics")
+        #st.write("Turns Used")
+        st.markdown(f'Turns Used<div class="number">{st.session_state.turns_used}/50</div>', unsafe_allow_html=True)
+        #st.write("Remaining")
+        st.markdown(f'Remaining<div class="number">{50 - st.session_state.turns_used}</div>', unsafe_allow_html=True)
         
-        st.markdown("---")
+        st.divider()
         
-        st.markdown(f"**Session ID:** {st.session_state.session_id}")
-        
-        st.markdown("---")
-        
-        st.markdown("### ⚙️ Settings")
-        st.session_state.include_history = st.toggle(
+        st.caption(f"Session ID: {st.session_state.session_id}")
+                
+        st.markdown("## ⚙️ Settings")
+        st.toggle(
             "Include conversation history",
+            key="include_history",
             value=st.session_state.include_history,
             help="Include previous messages in the conversation context"
         )
         
         if st.button("Reset conversation", use_container_width=True):
             st.session_state.messages = []
-            st.session_state.turns_used = 0
             st.rerun()
         
-        st.markdown("---")
+        st.divider()
         
-        st.markdown("### ⚠️ Important")
+        st.markdown("## ⚠️ Important")
         st.markdown("""
         - This is for Assignment 2 research only
         - After refreshing the page, you need to log in again.
@@ -250,26 +169,20 @@ def show_chatbot_page():
         - Output token limits (300 tokens)
         """)
     
+    st.title("Pre-Consultation Chatbot")
     # Main chat area
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        st.markdown(f"<h1>Pre-Consultation Chatbot</h1>", unsafe_allow_html=True)
+        st.markdown(f"Student: {st.session_state.student_id}")
     with col2:
-        st.markdown(f"<div style='padding-top: 1rem;'><span class='student-info'><strong>Student:</strong> {st.session_state.student_id}</span></div>", unsafe_allow_html=True)
+        st.markdown('<div class="version-badge">Version B</div>', unsafe_allow_html=True)
     with col3:
-        st.markdown('<div class="version-badge" style="margin-top: 1rem;">Version: Version B</div>', unsafe_allow_html=True)
-    
-    # Logout button in top right
-    cols = st.columns([6, 1])
-    with cols[1]:
-        if st.button("Logout", key="logout_btn"):
+       if st.button("Logout", key="logout_btn", width="stretch"):
             st.session_state.logged_in = False
             st.session_state.student_id = ""
             st.session_state.messages = []
             st.session_state.turns_used = 0
             st.rerun()
-    
-    st.markdown("---")
     
     # Display chat messages
     for message in st.session_state.messages:
@@ -287,17 +200,17 @@ def show_chatbot_page():
             with st.chat_message("user"):
                 st.markdown(prompt)
             
-            # Increment turn counter
-            st.session_state.turns_used += 1
-            
             # Simulate assistant response
             with st.chat_message("assistant"):
-                response = "Thank you for sharing. This is a simulated response. In a real implementation, this would connect to an AI model to provide mental health support and guidance."
+                response = "AI will respond here (demo)."
                 st.markdown(response)
-            
+
             # Add assistant message
             st.session_state.messages.append({"role": "assistant", "content": response})
             
+            # Increment turn counter
+            st.session_state.turns_used += 1
+
             st.rerun()
 
 
